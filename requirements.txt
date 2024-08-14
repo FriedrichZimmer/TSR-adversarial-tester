@@ -1,0 +1,9 @@
+opencv-python
+numpy
+skimage
+inference
+keras
+tensorflow
+ultralytics
+pandas
+openpyxl
