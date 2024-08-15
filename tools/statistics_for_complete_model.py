@@ -10,7 +10,8 @@ import cv2
 import os
 import pandas as pd
 
-CLASS_NOT_IN_CLASSIFIER = [
+# list of traffic signs that were not part of the training data of a classifier and therefore are not supposed to be classified.
+CATEGORY_NOT_IN_CLASSIFIER = [
     ['No_Parking', 'deepranjang'],
     ['No_Parking', 'yashanksingh_v5'],
     ['KFC', 'deepranjang'],
@@ -24,7 +25,10 @@ CLASS_NOT_IN_CLASSIFIER = [
     ['Speed_40', 'again-3ibij']
 ]
 
-DEFAULT_PIXEL_MIN = 20
+# List of textures that are not proper traffic signs and therefore should be ignored in the evaluation of the detectors
+NOT_A_TRAFFIC_SIGN = [['KFC#Stop'], ['Texaco#No_Over']]
+
+DEFAULT_PIXEL_MIN = 30
 
 
 def category_not_in_classifier(sign, classifier, unknown_signs):
@@ -152,13 +156,13 @@ class TsrStatistics:
         self.num_detections = 0
         self.num_detections_pixel_min = 0
 
-        self.actual_sign = ''
-        self.adv_sign = ''
+        self._actual_sign = ''
+        self._adv_sign = ''
 
-        self.sign = ''
-        self.cam = ''
-        self.detector = ''
-        self.classifier = ''
+        self._sign = ''
+        self._cam = ''
+        self._detector = ''
+        self._classifier = ''
 
         print('Statistic calculation initiated')
 
@@ -174,19 +178,19 @@ class TsrStatistics:
 
         print(f'Calculating Statistics for {self.testproject_folder}...')
         # cycling all test results. Each test is another traffic sign texture
-        for self.sign in os.listdir(self.testproject_folder):
-            test_folder = os.path.join(self.testproject_folder, self.sign)
+        for self._sign in os.listdir(self.testproject_folder):
+            test_folder = os.path.join(self.testproject_folder, self._sign)
             if os.path.isfile(test_folder):
                 continue
 
-            print(f'-Analyzing Sign {self.sign}...')
+            print(f'-Analyzing Sign {self._sign}...')
 
             # get actual/adversarial sign
-            self.actual_sign, self.adv_sign = get_signs_from_name(self.sign)
+            self._actual_sign, self._adv_sign = get_signs_from_name(self._sign)
 
-            for self.cam in os.listdir(test_folder):
-                print(f'--Analyzing Camera {self.cam}...')
-                cam_folder = os.path.join(test_folder, self.cam)
+            for self._cam in os.listdir(test_folder):
+                print(f'--Analyzing Camera {self._cam}...')
+                cam_folder = os.path.join(test_folder, self._cam)
 
                 self.analyse_detectors(cam_folder)
 
@@ -194,19 +198,19 @@ class TsrStatistics:
 
     def analyse_detectors(self, cam_folder):
         """ classify all detection results """
-        for self.detector in os.listdir(cam_folder):
-            if self.detector == '_video':
+        for self._detector in os.listdir(cam_folder):
+            if self._detector == '_video':
                 continue
-            detector_folder = os.path.join(cam_folder, self.detector)
+            detector_folder = os.path.join(cam_folder, self._detector)
             if os.path.isfile(detector_folder):
                 continue
-            print(f'---Analyzing Detector {self.detector}...')
+            print(f'---Analyzing Detector {self._detector}...')
             cropped_folder = os.path.join(detector_folder, 'cropped')
             # get values for detectors
             self.num_detections = 0
             self.num_detections_pixel_min = 0
             self.count_detections(cropped_folder)
-            self.result_table_detector.append([self.sign, self.cam, self.detector, self.num_detections,
+            self.result_table_detector.append([self._sign, self._cam, self._detector, self.num_detections,
                                                self.num_detections_pixel_min])
 
             # if not self.calc_class_stat:
@@ -226,22 +230,22 @@ class TsrStatistics:
 
     def count_classifications(self, cropped_folder):
         # get values for classifiers
-        for self.classifier in os.listdir(cropped_folder):
-            classifier_folder = os.path.join(cropped_folder, self.classifier)
+        for self._classifier in os.listdir(cropped_folder):
+            classifier_folder = os.path.join(cropped_folder, self._classifier)
             if os.path.isfile(classifier_folder):  # skip the cropped images
                 continue
-            print(f'----Analyzing Classifier {self.classifier}...')
+            print(f'----Analyzing Classifier {self._classifier}...')
 
             good, below_threshold, adv, other = self.count_result_signs(classifier_folder)
 
             precision, recall, success, f_score = calc_classif_precision(good, below_threshold, adv, other)
 
-            self.result_table_classifier_enhanced.append([self.sign,
-                                                          self.actual_sign,
-                                                          self.adv_sign,
-                                                          self.cam,
-                                                          self.detector,
-                                                          self.classifier,
+            self.result_table_classifier_enhanced.append([self._sign,
+                                                          self._actual_sign,
+                                                          self._adv_sign,
+                                                          self._cam,
+                                                          self._detector,
+                                                          self._classifier,
                                                           self.num_detections_pixel_min,
                                                           good,
                                                           below_threshold,
@@ -271,26 +275,26 @@ class TsrStatistics:
                     if image_pixel_above_min(sorted_image_path, self.pixel_min):
                         num_classif_pix_above_min += 1
 
-                self.result_table_classifier_raw.append([self.sign,
-                                                         self.cam,
-                                                         self.detector,
-                                                         self.classifier,
+                self.result_table_classifier_raw.append([self._sign,
+                                                         self._cam,
+                                                         self._detector,
+                                                         self._classifier,
                                                          self.num_detections_pixel_min,
                                                          result_sign,
                                                          num_classifications,
                                                          num_classif_pix_above_min])
                 # print(f'{result_sign}, {self.actual_sign}, {self.adv_sign}')
-                if result_sign == self.actual_sign:
+                if result_sign == self._actual_sign:
                     good = num_classif_pix_above_min
                 elif result_sign == '_below_threshold':
                     below_threshold = num_classif_pix_above_min
-                elif result_sign == self.adv_sign:
+                elif result_sign == self._adv_sign:
                     adv = num_classif_pix_above_min
                 else:
                     other += num_classif_pix_above_min
 
                 # print(self.actual_sign, self.classifier)
-                if category_not_in_classifier(self.actual_sign, self.classifier, self.not_learned_signs):
+                if category_not_in_classifier(self._actual_sign, self._classifier, self.not_learned_signs):
 
                     if good > 0:
                         print('ERROR: Sign actually exists in classifier!')
@@ -311,22 +315,34 @@ class TsrStatistics:
             cam_filter:
         """
         print('Exporting Result Excel...')
+
         tsr_stat_filename = f'tsr_stat_{self.pixel_min}'
         if cam_filter:
             tsr_stat_filename = f'{tsr_stat_filename}_{cam_filter}'
         if detector_filter:
             tsr_stat_filename = f'{tsr_stat_filename}_{detector_filter}'
-
         result_excel = pd.ExcelWriter(f'{self.testproject_folder}\\{tsr_stat_filename}.xlsx', mode='w')
 
+        self.export_detector_stat(result_excel, calc_camera_stat, cam_filter, detector_filter)
+
+        # calculate classifier statistics
+        if calc_class_stat:
+            self.export_classifier_stat(result_excel, calc_camera_stat, cam_filter, detector_filter)
+
+        self.export_special_rules(result_excel)
+
+        result_excel.close()
+
+        return result_excel
+
+    def export_detector_stat(self, result_excel, calc_camera_stat, cam_filter, detector_filter):
         # predefining this header name as it is used in several places
         num_det_px = f'num_det_px>={self.pixel_min}'
 
         # calculate detector statistics
         # this statistics assumes that there are no false positive detections and no double detections.
         df_detector = pd.DataFrame(self.result_table_detector,
-                                   columns=['Traffic Sign', 'Camera', 'Detector', 'num_detections',
-                                            f'num_det_px>={self.pixel_min}'])
+                                   columns=['Traffic_Sign', 'Camera', 'Detector', 'num_detections', num_det_px])
         if cam_filter:
             print(f'Camera == {cam_filter}')
             df_detector = df_detector.query('Camera == @cam_filter')
@@ -337,13 +353,27 @@ class TsrStatistics:
 
         # only shows sum of found images for each detector
         df_calc = df_detector[['Detector', 'num_detections', num_det_px]]
-        df_calc = df_calc.groupby(['Detector']).sum()
+        df_calc = df_calc.groupby(['Detector']).mean()
+
+        # detection only basic
+        df_basic = df_detector[df_detector['Traffic_Sign'].str.contains('#') == False]
+        df_basic = df_basic[['Detector', 'num_detections', num_det_px]]
+        df_basic = df_basic.groupby(['Detector']).mean()
+
+        # detection only adversarial( with # in traffic sign name
+        df_adv = df_detector[df_detector['Traffic_Sign'].str.contains('#')]
+        df_adv = df_adv[['Detector', 'num_detections', num_det_px]]
+        df_adv = df_adv.groupby(['Detector']).mean()
+
+        # Join all, basic and adversarial stats into a single table
+        df_calc = df_calc.merge(df_basic, on='Detector', suffixes=('', '_basic'))
+        df_calc = df_calc.merge(df_adv, on='Detector', suffixes=('', '_adv'))
 
         df_calc.to_excel(result_excel, sheet_name='Detector_Efficiency')
 
         # detection robustness by sign
-        df_calc = df_detector[['Traffic Sign', 'Detector', 'num_detections', num_det_px]]
-        df_calc = df_calc.groupby(['Traffic Sign', 'Detector']).sum()
+        df_calc = df_detector[['Traffic_Sign', 'Detector', 'num_detections', num_det_px]]
+        df_calc = df_calc.groupby(['Traffic_Sign', 'Detector']).sum()
         df_calc.to_excel(result_excel, sheet_name='Detector_TrafficSign')
 
         # detection robustness by camera
@@ -352,86 +382,89 @@ class TsrStatistics:
             df_calc = df_calc.groupby(['Camera', 'Detector']).sum()
             df_calc.to_excel(result_excel, sheet_name='Detector_Camera')
 
+    def export_classifier_stat(self, result_excel, calc_camera_stat, cam_filter, detector_filter):
+
+        num_det_px = f'num_det_px>={self.pixel_min}'
         # calculate classifier statistics
-        if calc_class_stat:
-            # calculate classifier statistics
-            df_raw = pd.DataFrame(self.result_table_classifier_raw,
-                                  columns=['Traffic Sign', 'Camera', 'Detector', 'Classifier',
-                                           num_det_px,
-                                           'Result sign', 'num_classifications', f'num_class_px>={self.pixel_min}'])
-            if cam_filter:
-                df_raw = df_raw.query('Camera == @cam_filter')
-            if detector_filter:
-                df_raw = df_raw.query('Detector == @detector_filter')
-            # export excel
-            df_raw.to_excel(result_excel, sheet_name='Class_Raw_Data')
+        df_raw = pd.DataFrame(self.result_table_classifier_raw,
+                              columns=['Traffic_Sign', 'Camera', 'Detector', 'Classifier',
+                                       num_det_px,
+                                       'Result sign', 'num_classifications', f'num_class_px>={self.pixel_min}'])
+        if cam_filter:
+            df_raw = df_raw.query('Camera == @cam_filter')
+        if detector_filter:
+            df_raw = df_raw.query('Detector == @detector_filter')
+        # export excel
+        df_raw.to_excel(result_excel, sheet_name='Class_Raw_Data')
 
-            df_results = pd.DataFrame(self.result_table_classifier_enhanced,
-                                      columns=['Traffic Sign', 'Actual sign', 'Advers sign', 'Camera', 'Detector',
-                                               'Classifier', num_det_px, 'good', 'below_threshold',
-                                               'adversarial', 'other_bad',
-                                               'precision (%)', 'recall (%)', 'adv_success (%)'])
-            if cam_filter:
-                df_results = df_results.query('Camera == @cam_filter')
-            if detector_filter:
-                df_results = df_results.query('Detector == @detector_filter')
-            df_results.to_excel(result_excel, sheet_name='Class_Result_Details')
+        df_results = pd.DataFrame(self.result_table_classifier_enhanced,
+                                  columns=['Traffic_Sign', 'Actual sign', 'Advers sign', 'Camera', 'Detector',
+                                           'Classifier', num_det_px, 'good', 'below_threshold',
+                                           'adversarial', 'other_bad',
+                                           'precision (%)', 'recall (%)', 'adv_success (%)'])
+        if cam_filter:
+            df_results = df_results.query('Camera == @cam_filter')
+        if detector_filter:
+            df_results = df_results.query('Detector == @detector_filter')
+        df_results.to_excel(result_excel, sheet_name='Class_Result_Details')
 
-            # general classification robustness
-            df_calc = df_results[
-                ['Detector', 'Classifier', num_det_px, 'good', 'below_threshold', 'adversarial', 'other_bad']]
-            df_calc = df_calc.groupby(['Detector', 'Classifier']).sum()
+        # general classification robustness
+        df_calc = df_results[
+            ['Detector', 'Classifier', num_det_px, 'good', 'below_threshold', 'adversarial', 'other_bad']]
+        df_calc = df_calc.groupby(['Detector', 'Classifier']).sum()
+        df_calc = add_precision(df_calc)
+        df_calc.to_excel(result_excel, sheet_name='Class_Robustness')
+
+        # classification robustness by sign
+        df_calc = df_results[
+            ['Traffic_Sign', 'Detector', 'Classifier', num_det_px, 'good', 'below_threshold', 'adversarial',
+             'other_bad']]
+        df_calc = df_calc.groupby(['Traffic_Sign', 'Detector', 'Classifier']).sum()
+        df_calc = add_precision(df_calc)
+        df_calc.to_excel(result_excel, sheet_name='Class_TrafficSign')
+
+        # classification robustness against various camera conditions
+        if calc_camera_stat:
+            df_calc = df_results[['Detector', 'Classifier', 'Camera', num_det_px, 'good', 'below_threshold',
+                                  'adversarial', 'other_bad']]
+            df_calc = df_calc.groupby(['Detector', 'Classifier', 'Camera']).sum()
             df_calc = add_precision(df_calc)
-            df_calc.to_excel(result_excel, sheet_name='Class_Robustness')
+            df_calc.to_excel(result_excel, sheet_name='Class_Camera')
 
-            # classification robustness by sign
+        # classification robustness without attacks
+        df_calc = df_results[df_results['Advers sign'] == '']
+        df_calc = df_calc[
+            ['Detector', 'Classifier', num_det_px, 'good', 'below_threshold', 'adversarial', 'other_bad']]
+        df_calc = df_calc.groupby(['Detector', 'Classifier']).sum()
+        df_calc = add_precision(df_calc)
+        df_calc.to_excel(result_excel, sheet_name='Class_Basic_Robustness')
+
+        # classification robustness_attacks_only
+        df_calc = df_results[df_results['Advers sign'] != '']
+        df_calc = df_calc[
+            ['Detector', 'Classifier', num_det_px, 'good', 'below_threshold', 'adversarial', 'other_bad']]
+        df_calc = df_calc.groupby(['Detector', 'Classifier']).sum()
+        df_calc = add_precision(df_calc)
+        df_calc.to_excel(result_excel, sheet_name='Class_Attack_Robustness')
+
+        if calc_camera_stat:
             df_calc = df_results[
-                ['Traffic Sign', 'Detector', 'Classifier', num_det_px, 'good', 'below_threshold', 'adversarial',
+                ['Detector', 'Classifier', 'Camera', num_det_px, 'good', 'below_threshold', 'adversarial',
                  'other_bad']]
-            df_calc = df_calc.groupby(['Traffic Sign', 'Detector', 'Classifier']).sum()
+            df_calc = df_calc.groupby(['Detector', 'Classifier', 'Camera']).sum()
             df_calc = add_precision(df_calc)
-            df_calc.to_excel(result_excel, sheet_name='Class_TrafficSign')
+            df_calc.to_excel(result_excel, sheet_name='Class_Attack_Camera')
 
-            # classification robustness against various camera conditions
-            if calc_camera_stat:
-                df_calc = df_results[['Detector', 'Classifier', 'Camera', num_det_px, 'good', 'below_threshold',
-                                      'adversarial', 'other_bad']]
-                df_calc = df_calc.groupby(['Detector', 'Classifier', 'Camera']).sum()
-                df_calc = add_precision(df_calc)
-                df_calc.to_excel(result_excel, sheet_name='Class_Camera')
-
-            # classification robustness without attacks
-            df_calc = df_results[df_results['Advers sign'] == '']
-            df_calc = df_calc[
-                ['Detector', 'Classifier', num_det_px, 'good', 'below_threshold', 'adversarial', 'other_bad']]
-            df_calc = df_calc.groupby(['Detector', 'Classifier']).sum()
-            df_calc = add_precision(df_calc)
-            df_calc.to_excel(result_excel, sheet_name='Class_Basic_Robustness')
-
-            # classification robustness_attacks_only
-            df_calc = df_results[df_results['Advers sign'] != '']
-            df_calc = df_calc[
-                ['Detector', 'Classifier', num_det_px, 'good', 'below_threshold', 'adversarial', 'other_bad']]
-            df_calc = df_calc.groupby(['Detector', 'Classifier']).sum()
-            df_calc = add_precision(df_calc)
-            df_calc.to_excel(result_excel, sheet_name='Class_Attack_Robustness')
-
-            if calc_camera_stat:
-                df_calc = df_results[
-                    ['Detector', 'Classifier', 'Camera', num_det_px, 'good', 'below_threshold', 'adversarial',
-                     'other_bad']]
-                df_calc = df_calc.groupby(['Detector', 'Classifier', 'Camera']).sum()
-                df_calc = add_precision(df_calc)
-                df_calc.to_excel(result_excel, sheet_name='Class_Attack_Camera')
-
-            result_excel.close()
-
-        return result_excel
+    def export_special_rules(self, result_excel):
+        df_calc = pd.DataFrame(CATEGORY_NOT_IN_CLASSIFIER).T
+        df_calc.to_excel(result_excel, sheet_name='Cat_not_in_Classify')
+        df_calc = pd.DataFrame(NOT_A_TRAFFIC_SIGN).T
+        df_calc.to_excel(result_excel, sheet_name='TS_ignored_for_detection')
 
 
 def simple_statistics(testproject_folder):
     """Wrapper for creating a simple statistics with default values"""
-    tsr_stats = TsrStatistics(testproject_folder, CLASS_NOT_IN_CLASSIFIER)
+    tsr_stats = TsrStatistics(testproject_folder, CATEGORY_NOT_IN_CLASSIFIER)
     tsr_stats.analyse_tests(DEFAULT_PIXEL_MIN)
     os.startfile(tsr_stats.export_stat_excel())
 
@@ -439,12 +472,12 @@ def simple_statistics(testproject_folder):
 if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument('testproject_folder', type=str, help='Filepath and name of the results directory')
-    parser.add_argument('-camfilter', type=str, help='statisitics only for a single cam')
-    parser.add_argument('-detectorfilter', type=str, help='statisitics only for a single detector')
+    parser.add_argument('-camfilter', type=str, help='statistics only for a single cam')
+    parser.add_argument('-detectorfilter', type=str, help='statistics only for a single detector')
     parser.add_argument('-p', type=int, help='Minimum Image size in pixel to be analysed',
                         default=DEFAULT_PIXEL_MIN)
 
     args = parser.parse_args()
-    tsr_statistics = TsrStatistics(args.testproject_folder, CLASS_NOT_IN_CLASSIFIER)
+    tsr_statistics = TsrStatistics(args.testproject_folder, CATEGORY_NOT_IN_CLASSIFIER)
     tsr_statistics.analyse_tests(args.p)
     os.startfile(tsr_statistics.export_stat_excel(cam_filter=args.camfilter, detector_filter=args.detectorfilter))
