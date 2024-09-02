@@ -1,6 +1,6 @@
 """
 Copyright (c) 2024 Friedrich Zimmer
-Class for cropping images based on certain previous detection results
+Class for cropping images based on certain previous detection results or a predefined ground truth
 """
 
 import time

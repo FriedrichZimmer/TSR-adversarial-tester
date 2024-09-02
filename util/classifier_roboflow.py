@@ -10,6 +10,14 @@ from inference import get_model
 
 class RoboFlowClassModel(Classifier):
     def __init__(self, model, class_list, threshold=0.6, name='Roboflow_Classifier'):
+        """
+            Class for classifieng traffic signs with Keras/Tensorflow based detectors
+            Args:
+            model (str,str): model ID and api key of the used model
+            class_list [str]: Array of string values with the category names sorted by category ID of the model
+            threshold (float): threshold for filtering out unreliable results
+            name (str): Name of the classifier model
+        """
         super().__init__(threshold=threshold, name=name)
         self.category_list = class_list
         print(f'Loading Roboflow model {name} as classifier')
@@ -27,7 +35,7 @@ class RoboFlowClassModel(Classifier):
         Returns (ClassificationResult): Object with classification results
         """
 
-        # confidence for the first detection.
+        # confidence threshold for the first detection. for getting confidence value, even if it's below the threshold
         result = self.model.infer(image=image_path, confidence=0.3)
 
         classification_result = ClassificationResult(image_path)

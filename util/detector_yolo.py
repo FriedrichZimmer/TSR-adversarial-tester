@@ -30,13 +30,8 @@ class YoloModel(Detector):
 
         for result in results:
             # get path of original image
-            image_name = result.path[result.path.rfind('\\') + 1:]
             detection_result = DetectionResult(result.path, self.result_folder)
             # saving original images with detection boxes
-            if self.export_boxed:
-                save_file = os.path.join(self.result_folder, f'boxed_{image_name}')
-                print(f'Export boxed image as {save_file}')
-                result.save(filename=save_file)
 
             boxes = result.boxes
             if boxes is not None:
@@ -47,5 +42,6 @@ class YoloModel(Detector):
 
             detection_result.crop_images(self.box_files, self.sign)
 
+            # export the complete images with boxes
             if self.export_boxed:
                 detection_result.create_boxed_image()

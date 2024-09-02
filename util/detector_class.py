@@ -32,7 +32,7 @@ class DetBoxFiles:
         self.box_results.writerow([orig_image, box[0], box[1], box[2], box[3], box[4], box[5]])
         # box_results: original image, x1, y1, x2, y2, true category
         self.gt_detector.writerow([orig_image, box[0], box[1], box[2], box[3], sign])
-        image_name = orig_image[orig_image.rfind('\\') + 1:]
+        # image_name = orig_image[orig_image.rfind('\\') + 1:]
         self.gt_classifier.writerow([cropped_image, sign, box[0], box[1], box[2], box[3]])
 
     def add_boxes(self, boxes, sign, orig_image):

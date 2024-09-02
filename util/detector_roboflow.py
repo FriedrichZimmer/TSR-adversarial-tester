@@ -46,4 +46,4 @@ class RoboFlowDetModel(Detector):
             detection_result.crop_images(self.box_files, self.sign)
             if self.export_boxed:
                 detection_result.create_boxed_image()
-            # self.box_files.add_boxes(detection_result.boxes, self.sign, image_path)
+

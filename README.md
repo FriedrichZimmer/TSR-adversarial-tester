@@ -80,12 +80,12 @@ python tools/convert_img_video.py demo/Speed_100#Speed_120/01_default_new/Bestbo
 ```
 
 ## Roadmap
-Until my Master Thesis is finished end of August 2024, I will continuously update this project. After this, I probably will abandon this project.
+Until my Master Thesis is finished end of September 2024, I this project will be updated. After this, this project will probably get abandoned.
 
-Some Change ideas:
+Some ideas:
 -[ ] Make statistic based on csv instead of the number of images. This will make calculation much faster.
 -[ ] Add support for other machine learning frameworks and model formats.
--[ ] Add a ground truth for the detectors
+-[ ] Add a ground truth for the detectors. This will enable additional statistics
 -[ ] Train traffic sign detection and classification models based the original and cropped images. As all images are having traffic signs in the exact same location and the same light conditions an evenly distributed training data.
 
 ## Support
@@ -94,8 +94,5 @@ You can contact me at friedrich.zimmer@arrk-engineering.com.
 ## License
 This project is licensed under the MIT license.
 Copyright 2024 (c) Friedrich Zimmer at ARRK Engineering
-
-## Project status
-
 
 ***

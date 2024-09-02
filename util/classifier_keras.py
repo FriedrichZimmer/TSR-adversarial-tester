@@ -15,6 +15,17 @@ class KerasClassModel(Classifier):
 
     def __init__(self, mp, class_list, threshold=0.6, name="Keras_Classifier", img_size=None, save_pp=False,
                  eq=False):
+        """
+            Class for classifieng traffic signs with Keras/Tensorflow based detectors
+            Args:
+            mp (str): path to the model file. (Tested with .h5 file)
+            class_list [str]: Array of string values with the category names sorted by category ID of the model
+            threshold (float): threshold for filtering out unreliable results
+            name (str): Name of the classifier model
+            img_size (int): size in pixel of the input format of the classifier
+            save_pp (bool): if true, the preprocessed cropped images are exported
+            eq (bool): if true during preprocessing also equalizing will be performed
+        """
         super().__init__(threshold=threshold, name=name)
         self.class_list = class_list
         print(f'Loading Keras model {name} from {mp} as classifier')
