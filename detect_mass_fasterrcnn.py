@@ -7,7 +7,7 @@ from util.detector_tensorflow import TFModel
 detector_name = 'youssef_faster_rcnn'
 threshold = 0.4
 model_path = 'models/yousouf/saved_model'
-export_boxed = False
+export_boxed = True
 
 classes_gtsrdb = ['Speed_20',
                   'Speed_30',

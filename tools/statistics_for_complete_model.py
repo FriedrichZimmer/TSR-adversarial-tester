@@ -55,35 +55,35 @@ def image_pixel_above_min(image_path, pixel_min):
 
 
 def calc_classif_precision(good, below_threshold, adv, other):
-    """ calculates precision, recall and the success rate of adversarial attacks
+    """ calculates precision, recall and the physival adversarial success rate (pasr)
     Args:
         good: The amount of images, that have been classified correctly/true positive
         below_threshold: The amount of images where the classification confidence is below the defined threshold
-        adv: The amount of images that have been classifies as the adversarial target
+        adv: The amount of images that have been classified as the adversarial target
         (0 if image is not an adversarial example)
         other: The amount of images, that have been classified as another wrong category
     """
 
     # those calculations assume that alle cropped images were detected correctly
     if good + adv + other == 0:
-        precision = -1
-        success = 0
+        precision = 0.0
     else:
-        # wrong classification is both a false negative and a false positive
         precision = 100 * good / (good + adv + other)
-        success = 100 * adv / (good + adv + other)
 
+    # wrong classification (adv, other) is both a false negative and a false positive
     if good + adv + other + below_threshold > 0:
         recall = 100 * good / (good + adv + other + below_threshold)
+        pasr = 100 * adv / (good + adv + other + below_threshold)
     else:
-        recall = -1
+        pasr = 0.0
+        recall = 0.0
 
     if precision + recall > 0:
         f_score = 2 * precision * recall / (precision + recall)
     else:
         f_score = 0
 
-    return round(precision, 1), round(recall, 1), round(success, 1), round(f_score, 1)
+    return round(precision, 1), round(recall, 1), round(pasr, 1), round(f_score, 1)
 
 
 def add_precision(df):

@@ -23,10 +23,18 @@ if __name__ == '__main__':
     # influence of image size
     tsr_statistics.export_stat_excel(detector_filter='Bestbox_0.0', cam_filter='01_default_new')
 
+    tsr_statistics.analyse_tests(10)
+    tsr_statistics.export_stat_excel()
+    tsr_statistics.export_stat_excel(detector_filter='Bestbox_0.0', cam_filter='01_default_new')
+
     tsr_statistics.analyse_tests(20)
     tsr_statistics.export_stat_excel()
     tsr_statistics.export_stat_excel(detector_filter='Bestbox_0.0', cam_filter='01_default_new')
 
     tsr_statistics.analyse_tests(40)
+    tsr_statistics.export_stat_excel()
+    tsr_statistics.export_stat_excel(detector_filter='Bestbox_0.0', cam_filter='01_default_new')
+
+    tsr_statistics.analyse_tests(50)
     tsr_statistics.export_stat_excel()
     tsr_statistics.export_stat_excel(detector_filter='Bestbox_0.0', cam_filter='01_default_new')

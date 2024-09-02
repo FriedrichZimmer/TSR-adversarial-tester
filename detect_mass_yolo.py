@@ -7,7 +7,7 @@ from util.detector_yolo import YoloModel
 detector_name = 'yashanksingh_train_1'
 threshold = 0.4
 model_path = 'models\\singh_detect\\best.pt'
-export_boxed = False
+export_boxed = True
 
 
 def main(testproject_folder):

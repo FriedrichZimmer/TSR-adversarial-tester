@@ -21,7 +21,7 @@ detector_name = 'smartcopilot'
 threshold = 0.4
 api_key = 'AiLy0Tt17OhmzTaP1TE9'
 model_id = 'smartcopilot/1'
-export_boxed = False
+export_boxed = True
 
 
 def detect_mass_roboflow(testproject_folder):

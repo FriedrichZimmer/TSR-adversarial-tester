@@ -46,3 +46,6 @@ class YoloModel(Detector):
                     detection_result.boxes.append(box)
 
             detection_result.crop_images(self.box_files, self.sign)
+
+            if self.export_boxed:
+                detection_result.create_boxed_image()
