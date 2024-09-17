@@ -199,7 +199,7 @@ class TsrStatistics:
     def analyse_detectors(self, cam_folder):
         """ classify all detection results """
         for self._detector in os.listdir(cam_folder):
-            if self._detector == '_video':
+            if self._detector == '_videos':
                 continue
             detector_folder = os.path.join(cam_folder, self._detector)
             if os.path.isfile(detector_folder):
@@ -265,7 +265,7 @@ class TsrStatistics:
         # now counting the amount of images in all subfolders
         for result_sign in os.listdir(classifier_folder):
             resultsign_folder = os.path.join(classifier_folder, result_sign)
-            if not os.path.isfile(resultsign_folder) and result_sign != 'pp' and result_sign != '_video':
+            if not os.path.isfile(resultsign_folder) and result_sign != 'pp' and result_sign != '_videos':
                 # num_classifications is the amount of detections for a certain category
                 num_classifications = len(os.listdir(resultsign_folder))
                 num_classif_pix_above_min = 0
