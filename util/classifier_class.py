@@ -68,6 +68,7 @@ class Classifier:
 
                         filename_conf = f'{SORTED_FOLDER}\\{round(result.confidence * 100, 1)}_{image_name}'
 
+                        # copies the the classified cropped file into the respective folder
                         shutil.copy(image_path, filename_conf)
 
                     c_results_file.close()

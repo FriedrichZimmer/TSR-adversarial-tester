@@ -23,9 +23,9 @@ def create_boxed_image(original_image, target_image, boxes, gt_cat=None):
         for box in boxes:
 
             if gt_cat:
-                if box[6] == '_below_threshold':
+                if box[6] == 'Below threshold':
                     color = (255, 0, 0)  # Blue, if classifier confidence below threshold
-                    text = f'Below threshold'
+                    text = f'{round(int(float(box[5]) * 100), 1)} {box[6]}'
                 elif box[6] == actual_sign:
                     color = (0, 255, 0)  # Green, if classification is corret
                     text = f'{round(int(float(box[5]) * 100), 1)} {box[6]}'
@@ -110,12 +110,13 @@ def create_boxi_detector(det_path):
         create_boxed_image(original_name, target_name, boxes)
 
 
-def create_boxi_classificator(class_path, pixel_min=20):
+def create_boxi_classificator(class_path, pixel_min=20, threshold=0.6):
     """creates boxed images with the classification results
 
     Args:
         class_path (str): Path to the classifier results
         pixel_min (int): Boxes with x or y size below this value are ignored
+        threshold (float): box is blue if confidence is below threshold
     """
     cr_path = path.join(class_path, 'classifier_results.csv')
     if not path.exists(cr_path):
@@ -171,6 +172,11 @@ def create_boxi_classificator(class_path, pixel_min=20):
             # print(f'{original_image[:4]} {image_nr_from_cropped}')
 
             if original_image[:4] == image_nr_from_cropped:
+                # check for threshold
+
+                if float(comb_row[0][2])< threshold:
+                    comb_row[0][1] = "Below threshold"
+
                 boxes.append([original_name, comb_row[1][2], comb_row[1][3], comb_row[1][4], comb_row[1][5],
                               comb_row[0][2], comb_row[0][1]])
 
